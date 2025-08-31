@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Check if we're in the server or web directory
+if [ -f "package.json" ]; then
+  # Server directory
+  echo "📦 Running server checks..."
+  npm run lint
+  npm run format
+  npm run type-check
+elif [ -f "web/package.json" ]; then
+  # Root directory - check both
+  echo "📦 Running web checks..."
+  cd web && npm run lint && npm run format && npm run type-check
+  cd ..
+  
+  echo "📦 Running server checks..."
+  cd server && npm run lint && npm run format && npm run type-check
+  cd ..
+else
+  echo "❌ No package.json found. Please run from project root or server/web directory."
+  exit 1
+fi
+
+echo "✅ Pre-commit checks passed!"
