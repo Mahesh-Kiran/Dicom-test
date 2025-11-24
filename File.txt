@@ -1,0 +1,437 @@
+7. Implementation of Ping Service
+import java.net.*;
+import java.io.*;
+public class b {
+    public static void main(String[] args) {
+        String hostname = args[0];
+        try {
+            System.out.println("Pinging " + hostname + "...");
+            InetAddress inetAddress = InetAddress.getByName(hostname);
+            boolean isReachable = inetAddress.isReachable(5000);
+            if (isReachable) {
+                System.out.println("Host " + hostname + " is reachable.");
+                System.out.println("IP Address: " + inetAddress.getHostAddress());
+            } else {
+                System.out.println("Host " + hostname + " is not reachable.");
+            }
+        } catch (Exception e) {
+            System.out.println("Unknown host: " + hostname);
+        }
+    }
+}
+
+6. LEAKY BUCKET -PROGRAM
+#include <stdio.h>
+
+int main() {
+    int bucket_size, output_rate, input_packets, stored = 0, time;
+
+    printf("Enter bucket size: ");
+    scanf("%d", &bucket_size);
+
+    printf("Enter output rate (leak rate): ");
+    scanf("%d", &output_rate);
+
+    printf("Enter number of cycles (time units): ");
+    scanf("%d", &time);
+
+    while (time--) {
+        printf("\nEnter number of packets arriving: ");
+        scanf("%d", &input_packets);
+
+        // Check for overflow condition
+        if (stored + input_packets > bucket_size) {
+            printf("Bucket overflow! %d packets dropped.\n", (stored + input_packets) - bucket_size);
+            stored = bucket_size;
+        } else {
+            stored += input_packets;
+        }
+
+        printf("Packets currently in bucket: %d\n", stored);
+
+        // Leak / Send packets
+        if (stored >= output_rate) {
+            stored -= output_rate;
+            printf("Packets sent: %d\n", output_rate);
+        } else {
+            printf("Packets sent: %d\n", stored);
+            stored = 0;
+        }
+
+        printf("Packets left in bucket after sending: %d\n", stored);
+    }
+
+    return 0;
+}
+
+import java.util.Scanner;
+
+public class LeakyBucket {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int bucketSize, outputRate, inputPackets, stored = 0, time;
+
+        System.out.print("Enter bucket size: ");
+        bucketSize = sc.nextInt();
+
+        System.out.print("Enter output rate (leak rate): ");
+        outputRate = sc.nextInt();
+
+        System.out.print("Enter number of cycles (time units): ");
+        time = sc.nextInt();
+
+        while (time-- > 0) {
+            System.out.print("\nEnter number of packets arriving: ");
+            inputPackets = sc.nextInt();
+
+            // Overflow check
+            if (stored + inputPackets > bucketSize) {
+                int dropped = (stored + inputPackets) - bucketSize;
+                System.out.println("Bucket overflow! " + dropped + " packets dropped.");
+                stored = bucketSize;
+            } else {
+                stored += inputPackets;
+            }
+
+            System.out.println("Packets currently in bucket: " + stored);
+
+            // Leak packets
+            if (stored >= outputRate) {
+                stored -= outputRate;
+                System.out.println("Packets sent: " + outputRate);
+            } else {
+                System.out.println("Packets sent: " + stored);
+                stored = 0;
+            }
+
+            System.out.println("Packets left in bucket after sending: " + stored);
+        }
+        
+        sc.close();
+    }
+}
+
+
+
+5. DNS
+import java.net.*;
+import java.util.Scanner;
+public class DNS {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter a domain name to resolve (or type 'exit' to quit):");
+        while (true) {
+            System.out.print("Domain: ");
+            String domain = scanner.nextLine();
+            if ("exit".equalsIgnoreCase(domain)) {
+                System.out.println("Exiting DNS Resolver. Goodbye!");
+                break;
+            }
+            try {
+                InetAddress[] addresses = InetAddress.getAllByName(domain);
+                System.out.println("IP addresses for " + domain + ":");
+                for (InetAddress address : addresses) {
+                    System.out.println(" - " + address.getHostAddress());
+                }
+            } catch (UnknownHostException e) {
+                System.out.println("Could not resolve domain: " + e.getMessage());
+            }
+        }
+        scanner.close();
+    }
+}
+
+
+4.Djkstras
+#include <stdio.h>
+#include <limits.h>
+#include <stdbool.h>
+#define V 7  
+int minDistance(int dist[], bool sptSet[]) {
+    int min = INT_MAX, min_index = -1;
+    for (int v = 0; v < V; v++)
+        if (!sptSet[v] && dist[v] <= min)
+            min = dist[v], min_index = v;
+    return min_index;
+}
+void dijkstra(int graph[V][V], int src) {
+    int dist[V];
+    bool sptSet[V];
+    for (int i = 0; i < V; i++)
+        dist[i] = INT_MAX, sptSet[i] = false;
+    dist[src] = 0;
+    for (int count = 0; count < V - 1; count++) {
+        int u = minDistance(dist, sptSet);
+        sptSet[u] = true;
+        for (int v = 0; v < V; v++)
+            if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX
+                && dist[u] + graph[u][v] < dist[v])
+                dist[v] = dist[u] + graph[u][v];
+    }
+    for (int i = 1; i < V; i++)
+        printf("Distance from source to %d: %d\n", i, dist[i]);
+}
+int main() {
+    int source = 0;
+
+    // printf("Graph (7 nodes, source: 0):\n");
+    // for (int i = 0; i < V; i++) {
+    //     for (int j = 0; j < V; j++) {
+    //         char ch;
+    //         while (scanf("%c", &ch) == 1 && (ch < '0' || ch > '9')) {}
+    //         ungetc(ch, stdin);
+    //         scanf("%d", &graph[i][j]);
+    //     }
+    // }
+int graph[V][V]={{0, 0, 1, 2, 0, 0, 0},
+{0, 0, 2, 0, 0, 3, 0},
+{1, 2, 0, 1, 3, 0, 0},
+{2, 0, 1, 0, 0, 0, 1},
+{0, 0, 3, 0, 0, 2, 0},
+{0, 3, 0, 0, 2, 0, 1},
+{0, 0, 0, 1, 0, 1, 0}};
+    dijkstra(graph, source);
+    return 0;
+}
+
+
+import java.util.*;
+
+public class SimpleDijkstra {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter number of nodes: ");
+        int n = sc.nextInt();
+
+        int[][] graph = new int[n][n];
+
+        System.out.println("Enter adjacency matrix (0 = no edge):");
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                graph[i][j] = sc.nextInt();
+            }
+        }
+
+        System.out.print("Enter the source node: ");
+        int src = sc.nextInt();
+
+        int[] dist = new int[n];
+        boolean[] visited = new boolean[n];
+
+        // initialize distances
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        dist[src] = 0;
+
+        // main Dijkstra logic
+        for (int count = 0; count < n - 1; count++) {
+
+            int minNode = -1;
+            int minDist = Integer.MAX_VALUE;
+
+            // pick unvisited node with smallest distance
+            for (int i = 0; i < n; i++) {
+                if (!visited[i] && dist[i] < minDist) {
+                    minDist = dist[i];
+                    minNode = i;
+                }
+            }
+
+            visited[minNode] = true;
+
+            // relax edges
+            for (int v = 0; v < n; v++) {
+                if (graph[minNode][v] != 0 && !visited[v]) {
+                    int newDist = dist[minNode] + graph[minNode][v];
+
+                    if (newDist < dist[v]) {
+                        dist[v] = newDist;
+                    }
+                }
+            }
+        }
+
+        // print output
+        System.out.println("\nShortest distances from source " + src + ":");
+        for (int i = 0; i < n; i++) {
+            System.out.println("To node " + i + ": " + dist[i]);
+        }
+
+        sc.close();
+    }
+}
+
+3. DVR
+
+#include <stdio.h>
+#define INF 9999
+#define MAX 10
+struct node {
+    int dist[MAX];
+    int nextHop[MAX];
+} rt[MAX];
+int main() {
+    int cost[MAX][MAX];
+    int n;
+    printf("Enter the number of nodes: ");
+    scanf("%d", &n);
+    printf("Enter the cost matrix (use 9999 for INF):\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &cost[i][j]);
+            rt[i].dist[j] = cost[i][j];
+            if (cost[i][j] != 9999 && i != j)
+                rt[i].nextHop[j] = j;
+            else
+                rt[i].nextHop[j] = -1;
+        }
+    int updated;
+    do {
+        updated = 0;
+        for (int i = 0; i < n; i++) { 
+            for (int j = 0; j < n; j++) { 
+                for (int k = 0; k < n; k++) { 
+                    if (rt[i].dist[j] > cost[i][k] + rt[k].dist[j]) {
+                        rt[i].dist[j] = cost[i][k] + rt[k].dist[j];
+                        rt[i].nextHop[j] = k;
+                        updated = 1;
+                    }
+                }
+            }
+        }
+    } while (updated);
+    for (int i = 0; i < n; i++) {
+        printf("\nRouting table for node %d:\n", i);
+        printf("Destination\tNext Hop\tDistance\n");
+        for (int j = 0; j < n; j++)
+            printf("%d\t\t%d\t\t%d\n", j, rt[i].nextHop[j], rt[i].dist[j]);
+    }
+    return 0;
+}
+
+
+import java.util.Scanner;
+
+public class DistanceVectorRouting {
+
+    static final int INF = 9999;
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter the number of nodes: ");
+        int n = sc.nextInt();
+
+        int[][] cost = new int[n][n];
+        int[][] dist = new int[n][n];
+        int[][] nextHop = new int[n][n];
+
+        System.out.println("Enter the cost matrix (use 9999 for INF):");
+
+        // Input and initialization
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                cost[i][j] = sc.nextInt();
+                if (i == j) cost[i][j] = 0;
+
+                dist[i][j] = cost[i][j];
+
+                if (cost[i][j] != 0 && cost[i][j] != INF)
+                    nextHop[i][j] = j;
+                else
+                    nextHop[i][j] = -1;
+            }
+        }
+
+        // Distance Vector Algorithm
+        boolean updated;
+        do {
+            updated = false;
+
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    for (int k = 0; k < n; k++) {
+
+                        if (dist[i][j] > cost[i][k] + dist[k][j]) {
+                            dist[i][j] = cost[i][k] + dist[k][j];
+                            nextHop[i][j] = k;
+                            updated = true;
+                        }
+                    }
+                }
+            }
+
+        } while (updated);
+
+        // Print Routing Tables
+        for (int i = 0; i < n; i++) {
+            System.out.println("\nRouting table for node " + i + ":");
+            System.out.println("Destination\tNext Hop\tDistance");
+
+            for (int j = 0; j < n; j++) {
+                System.out.println(j + "\t\t" + nextHop[i][j] + "\t\t" + dist[i][j]);
+            }
+        }
+
+        sc.close();
+    }
+}
+
+1.Subnetting
+import java.util.*;
+public class Subnetting {
+    public static int iptoint(String ip){
+        String[] parts=ip.split("\\.");
+        int result=0;
+        for(int i=0;i<4;i++){
+            result=(result<<8)|Integer.parseInt(parts[i]);
+        }
+        return result;
+    }
+    public static String inttoip(int ip){
+        return ((ip>>>24)&0xFF)+"."+((ip>>>16)&0xFF)+"."+((ip>>>8)&0xFF)+"."+(ip&0xFF);
+    } 
+    public static void main(String args[]){
+        Scanner sc=new Scanner(System.in);
+        String ip=sc.nextLine();
+        int mask=sc.nextInt();
+        int ipint=iptoint(ip);
+        int maskint=mask==0?0:0xFFFFFFFF<<(32-mask);
+        int network=ipint & maskint;
+        int broadcast=network|~maskint;
+        System.out.println("Network Address: "+inttoip(network));
+        int hostcount=(int)Math.pow(2,32-maskint)-2;
+        System.out.println("Number of Hosts: "+hostcount);
+        System.out.println("Broadcast Address: "+inttoip(broadcast));
+        int firsthost=network+1;
+        int lasthost=broadcast-1;
+        System.out.println("first host:"+inttoip(firsthost));
+        System.out.println("last host:"+inttoip(lasthost));
+        sc.close();
+    }
+}
+DHCP
+Router(config)# ip dhcp excluded-address 192.168.1.1 192.168.1.10
+Router(config)# ip dhcp pool LAN_POOL
+Router(dhcp-config)# network 192.168.1.0 255.255.255.0
+Router(dhcp-config)# default-router 192.168.1.1
+Router(dhcp-config)# dns-server 8.8.8.8
+Router(dhcp-config)# exit
+
+Subnetting
+Router> enable
+Router# configure terminal
+Router(config)# interface gigabitEthernet0/0
+Router(config-if)# ip address 192.168.10.1 255.255.255.192
+Router(config-if)# no shutdown
+
+Router(config)# interface gigabitEthernet0/1
+Router(config-if)# ip address 192.168.10.65 255.255.255.192
+Router(config-if)# no shutdown
+Router(config)# end
+
+
