@@ -114,3 +114,1012 @@ coverage/
 # Misc
 *.tgz
 *.tar.gz
+
+
+1. Minikube (Kubernetes) Lifecycle
+Start Minikube (choose one driver):
+
+
+minikube start --driver=docker 
+
+
+minikube start --driver=hyperv 
+
+
+Check status: minikube status 
+
+Deploy Nginx Application:
+
+
+kubectl create deployment mynginx --image=nginx 
+
+
+Verify: kubectl get deployments or kubectl get pods 
+
+Expose App (Create Service):
+
+
+kubectl expose deployment mynginx --type=NodePort --port=80 --target-port=80 
+
+Scale App (Add Replicas):
+
+
+kubectl scale deployment mynginx --replicas=4 
+
+Access App (View in Browser):
+
+
+Option A (Port Forward): kubectl port-forward svc/mynginx 8081:80 
+
+
+Go to: http://localhost:8081 
+
+
+Option B (Tunnel): minikube tunnel then minikube service mynginx --url 
+
+
+Dashboard: minikube dashboard 
+
+Cleanup:
+
+
+kubectl delete service mynginx 
+
+
+kubectl delete deployment mynginx 
+
+
+minikube stop 
+
+2. Nagios (Monitoring via Docker)
+Download & Start:
+
+
+docker pull jasonrivers/nagios:latest 
+
+
+docker run --name nagiosdemo -p 8888:80 jasonrivers/nagios:latest 
+
+Login to Dashboard:
+
+
+URL: http://localhost:8888 
+
+
+User: nagiosadmin 
+
+
+Pass: nagios 
+
+Stop & Remove:
+
+
+docker stop nagiosdemo 
+
+
+docker rm nagiosdemo 
+
+3. Essential Debugging Commands
+Pod keeps restarting / fails:
+
+
+Check details: kubectl describe pod <pod-name> 
+
+
+Check logs: kubectl logs <pod-name> 
+
+
+Check previous crash logs: kubectl logs <pod-name> --previous 
+
+Debug a Running Pod:
+
+
+Enter container shell: kubectl exec -it <pod-name> -- /bin/sh 
+
+Fix Bad Deployment (Rollback):
+
+
+kubectl rollout undo deployment/<name>
+
+Jenkins CI/CD & Email Notifications
+Quick Reference Guide
+
+Part 1: GitHub + Jenkins Integration (via Ngrok)
+Step 1: Ngrok Setup
+Install & Authenticate
+
+Download Ngrok from ngrok.com and extract
+Get your auth token from Ngrok dashboard
+Authenticate:
+
+powershell   ngrok config add-authtoken <YOUR_TOKEN>
+Start Tunnel
+powershell ngrok http 8080
+# Or use your Jenkins port: ngrok http 8081
+
+Step 2: GitHub Webhook Configuration
+Navigate: Repo → Settings → Webhooks → Add webhook
+SettingValuePayload URLhttps://<your-ngrok-url>/github-webhook/Content typeapplication/jsonEventsJust the push event
+Click Add webhook
+
+Step 3: Jenkins Job Configuration
+
+Dashboard → Select Job → Configure
+Scroll to Build Triggers
+Enable: GitHub hook trigger for GITScm polling
+Save
+
+
+Part 2: Email Notifications (Gmail)
+Step 1: Gmail App Password
+Enable 2-Step Verification
+
+Google Account → Security → 2-Step Verification → Turn ON
+
+Generate App Password
+
+Security → App passwords
+App: Other (Custom name) → Name: Jenkins-Demo
+Click Generate → Copy the 16-digit password
+
+
+Step 2: Jenkins Email Configuration
+Install Plugin
+
+Manage Jenkins → Plugins → Install Email Extension Plugin
+
+Configure SMTP
+
+Manage Jenkins → Configure System → E-mail Notification
+
+FieldValueSMTP Serversmtp.gmail.comUse SMTP Authentication✅UsernameYour Gmail addressPassword16-digit App PasswordUse SSL✅SMTP Port465
+Test: Click "Test configuration by sending test e-mail"
+
+Step 3: Job Email Notifications
+
+Job → Configure → Post-build Actions
+Add: Editable Email Notification
+Project Recipient List: Add email(s) (comma-separated)
+Triggers: Select events (Success, Failure, etc.)
+Save
+
+
+
+AWS EC2 Docker Deployment
+Quick Reference Guide
+
+Part 1: EC2 Instance Setup
+Launch Instance
+AWS Console → EC2 → Launch Instance
+SettingValueNameMyExampleWebServerOSUbuntu (Free tier)Instance Typet2.microKey PairCreate new .pem, download & saveSecurity Group✅ SSH, HTTP, HTTPS
+Connect via SSH
+powershellssh -i "MyExampleKeyPair.pem" ubuntu@<Public-DNS>
+
+Part 2: Install Dependencies
+bash# Update & install packages
+sudo apt update
+sudo apt-get install docker.io
+sudo apt install git nano
+
+Part 3: Deploy Static Site (Nginx)
+Local Setup
+bashgit init
+git add .
+git commit -m "first commit"
+git branch -M main
+git remote add origin <repo-url>
+git push -u origin main
+EC2 Deployment
+bash# Clone & navigate
+git clone <repo-url>
+cd AWS
+
+# Create Dockerfile
+nano Dockerfile
+Dockerfile:
+dockerfileFROM nginx:alpine
+COPY . /usr/share/nginx/html
+bash# Build & run
+sudo docker build -t mywebapp .
+sudo docker run -d -p 80:80 mywebapp
+Verify: http://<Public-IP>
+
+Part 4: Deploy Maven App (Tomcat)
+EC2 Deployment
+bash# Clone sample project
+git clone https://github.com/Puppala-Sagar/SampleMavenWebProject.git
+cd SampleMavenWebProject
+
+# Create Dockerfile
+nano Dockerfile
+Dockerfile:
+dockerfileFROM tomcat:9-jdk11
+COPY target/*.war /usr/local/tomcat/webapps
+bash# Build & run
+sudo docker build -t mavenwebproject .
+sudo docker run -d -p 9090:8080 mavenwebproject
+Open Port 9090
+AWS Console:
+
+Instances → Security → Security Groups
+Edit inbound rules → Add rule
+
+Port: 9090
+Source: 0.0.0.0/0
+
+
+Save
+
+Verify: http://<Public-IP>:9090/SampleMavenWebProject
+
+Part 5: Cleanup
+bash# Stop container
+sudo docker ps
+sudo docker stop <container-id>
+AWS Console:
+
+Terminate instance
+End Lab in AWS Academy
+
+
+Quick Commands
+bash# Docker basics
+sudo docker ps                    # List running containers
+sudo docker ps -a                 # List all containers
+sudo docker images                # List images
+sudo docker stop <id>             # Stop container
+sudo docker rm <id>               # Remove container
+sudo docker rmi <image>           # Remove image
+
+# Git basics
+git status                        # Check status
+git pull                          # Update repo
+git log --oneline         
+
+I. Maven Java Project Automation
+1. Create Build Job (MavenJava_Build)
+
+New Item: Select Freestyle project.
+
+Source Code Management (Git):
+
+Repository URL: [Your Maven Java Repo URL]
+
+
+Branch: */main (or */master) .
+
+Build Steps:
+
+Invoke top-level Maven targets:
+
+Version: MAVEN_HOME
+
+Goals: clean .
+
+Invoke top-level Maven targets:
+
+Version: MAVEN_HOME
+
+Goals: install .
+
+Post-build Actions:
+
+
+Archive the artifacts: **/* .
+
+
+Build other projects: MavenJava_Test (Trigger only if stable) .
+
+2. Create Test Job (MavenJava_Test)
+
+New Item: Select Freestyle project.
+
+
+Build Environment: Check Delete workspace before build starts .
+
+Build Steps:
+
+Copy artifacts from another project:
+
+Project: MavenJava_Build
+
+Build: Latest successful build / Stable build only
+
+Artifacts: **/* .
+
+Invoke top-level Maven targets:
+
+Version: MAVEN_HOME
+
+Goals: test .
+
+Post-build Actions:
+
+
+Archive the artifacts: **/* .
+
+3. Create Pipeline View
+
+New View: Click + on dashboard -> Select Build Pipeline View.
+
+Configure:
+
+Layout: Based on upstream/downstream relationship.
+
+
+Initial Job: MavenJava_Build .
+
+Run: Click Run on the pipeline view.
+
+II. Maven Web Project Automation
+1. Create Build Job (MavenWeb_Build)
+
+New Item: Select Freestyle project.
+
+Source Code Management (Git):
+
+Repository URL: [Your Maven Web Repo URL]
+
+
+Branch: */main .
+
+Build Steps:
+
+Invoke top-level Maven targets: clean
+
+
+Invoke top-level Maven targets: install .
+
+Post-build Actions:
+
+Archive the artifacts: **/*
+
+
+Build other projects: MavenWeb_Test (Trigger only if stable) .
+
+2. Create Test Job (MavenWeb_Test)
+
+New Item: Select Freestyle project.
+
+Build Environment: Check Delete workspace before build starts.
+
+Build Steps:
+
+
+Copy artifacts from another project: MavenWeb_Build (**/*) .
+
+
+Invoke top-level Maven targets: test .
+
+
+Post-build Actions:
+
+Archive the artifacts: **/*
+
+
+Build other projects: MavenWeb_Deploy (Trigger only if stable) .
+
+3. Create Deploy Job (MavenWeb_Deploy)
+
+New Item: Select Freestyle project.
+
+Build Environment: Check Delete workspace before build starts.
+
+Build Steps:
+
+
+Copy artifacts from another project: MavenWeb_Test (**/*) .
+
+Post-build Actions:
+
+Deploy WAR/EAR to a container:
+
+WAR/EAR files: **/*.war
+
+Context path: Webpath
+
+Container: Tomcat 9.x remote
+
+Credentials: admin/1234
+
+
+Tomcat URL: http://localhost:8085/ .
+
+4. Create Pipeline View
+
+New View: Build Pipeline View -> Initial Job: MavenWeb_Build.
+
+
+Run: Execute and verify deployment on Tomcat URL (/Webpath)
+
+
+Here is the Week 6 Cheat Sheet formatted as a step-by-step list for easy reading and copy-pasting.
+
+1. Essential Commands
+Start Services (Detached Mode)
+
+
+docker compose up -d 
+
+
+Stop and Remove Containers
+
+
+docker compose down 
+
+
+List Running Services
+
+
+docker compose ps 
+
+
+Scale a Service (Run multiple instances)
+
+
+docker compose up --scale <service_name>=2 -d 
+
+
+Rebuild Images (Force update of code)
+
+
+docker compose up --build 
+
+
+Access Container Shell
+
+
+docker exec -it <container_name> /bin/bash (or /bin/sh) 
+
+2. Master docker-compose.yml Template
+This template combines a Web Server, Database, Cache, Custom Network, and Persistent Volume into one file .
+
+
+YAML
+
+version: "3.9"
+
+services:
+  # 1. Web Service (Nginx)
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:80"        # Host:Container
+    networks:
+      - app-net
+    depends_on:          # Wait for these services to start first
+      - db
+      - redis
+
+  # 2. Database Service (Postgres)
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo_db
+    volumes:
+      - db-data:/var/lib/postgresql/data  # Persistent storage
+    networks:
+      - app-net
+
+  # 3. Cache Service (Redis)
+  redis:
+    image: redis:alpine
+    networks:
+      - app-net
+
+# Define Custom Network
+networks:
+  app-net:
+
+# Define Persistent Volume
+volumes:
+  db-data:
+3. Python Flask App (Build from Source)
+Use this configuration when you need to build a custom image from your own code .
+
+
+A. The Dockerfile
+
+Dockerfile
+
+FROM python:3.10-slim
+WORKDIR /app
+COPY app.py /app/
+RUN pip install flask
+CMD ["python", "app.py"]
+B. The docker-compose.yml entry
+
+YAML
+
+services:
+  web-app:
+    build: .           # Looks for Dockerfile in current directory
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+4. Quick Tasks & Troubleshooting
+Database Access (Postgres) To enter the running database container and run SQL commands:
+
+Bash
+
+docker exec -it <container_name> psql -U demo -d demo_db
+
+
+Networking Logic Containers on the same network (e.g., app-net) can communicate using their service names as hostnames. For example, the web container connects to the database using the hostname db.
+
+
+Scaling Conflict If you try to scale a service that binds to a specific host port (e.g., 8080:80), it will fail because the port is already in use by the first container. To scale, you must remove the fixed host port mapping or use a load balance
+
+
+1. Basic Container Management
+Pull Image
+
+Command: docker pull redis
+
+Description: Downloads the redis image from Docker Hub.
+
+Run Container
+
+Command: docker run --name my-redis -d redis
+
+Description: Starts a container named my-redis in the background (-d).
+
+List Running Containers
+
+Command: docker ps
+
+Description: Shows currently running containers.
+
+List All Containers
+
+Command: docker ps -a
+
+Description: Shows all containers, including stopped ones.
+
+Stop Container
+
+Command: docker stop my-redis
+
+Description: Stops the running container.
+
+Start Container
+
+Command: docker start my-redis
+
+Description: Restarts a stopped container.
+
+Remove Container
+
+Command: docker rm my-redis
+
+Description: Permanently deletes a container (must be stopped first).
+
+2. Image Management
+List Images
+
+Command: docker images
+
+Description: Lists all images saved locally.
+
+Remove Image
+
+Command: docker rmi redis
+
+Description: Deletes an image from the local system.
+
+Snapshot Container
+
+Command: docker commit <container_id> <user>/<repo>
+
+Description: Creates a new image from a specific container's state.
+
+3. Interacting with Containers
+Access Internal CLI
+
+Command: docker exec -it my-redis redis-cli
+
+Description: Opens the Redis command-line tool inside the running container.
+
+Redis Commands (inside CLI)
+
+SET name "Alice": Saves a key-value pair.
+
+GET name: Retrieves the value.
+
+exit: Exits the Redis CLI.
+
+4. Working with Dockerfiles
+Step 1: Create Dockerfile Create a file named Dockerfile (no extension) with the following content:
+
+Dockerfile
+
+FROM redis:latest
+CMD ["redis-server"]
+Step 2: Build Image
+
+Command: docker build -t redisnew .
+
+Details:
+
+-t redisnew: Tags the image with the name "redisnew".
+
+.: Tells Docker to look for the Dockerfile in the current directory.
+
+Step 3: Run Custom Image
+
+Command: docker run --name myredisnew -d redisnew
+
+Description: Starts a container using your newly built custom image.
+
+5. Docker Hub Operations
+Login
+
+Command: docker login
+
+Description: Authenticates with your Docker Hub credentials.
+
+Push Image
+
+Command: docker push <username>/<repo>
+
+Description: Uploads your image to Docker Hub.
+
+Pull Custom Image
+
+Command: docker pull <username>/<repo>
+
+Description: Downloads your specific image from Docker Hub.
+
+Logout
+
+Command: docker logout
+
+Description: Logs out and removes stored credentials.
+
+6. Key Flags Reference
+-d: Detached mode. Runs the container in the background.
+
+-it: Interactive TTY. Allows you to interact with the container via a terminal.
+
+--name: Assigns a custom name to the container.
+
+-t: Tags an image with a specific name during build
+
+
+
+1. Maven Project StructureStandard directory layout for Maven projects 1.DirectoryPurposesrc/main/javaApplication source code.src/main/resourcesConfiguration files (e.g., config.properties).src/test/javaUnit test source code.src/test/resourcesTest-specific resources.pom.xmlProject Object Model (Configuration file).target/Generated compiled files (.class), JARs, or WARs.2. Essential Maven Commands (CLI)Run these commands in the terminal where pom.xml is located.CommandDescriptionSourcemvn cleanDeletes the target/ folder (cleans previous builds). 2mvn installBuilds, tests, and installs package to local .m2 repo. 3mvn clean installStandard command to clean and rebuild the project. 4mvn testRuns unit tests (results in target/surefire-reports). 5555mvn packageGenerates the final artifact (JAR/WAR) in target/. 6666mvn clean install -UForces update of snapshots/dependencies. 7mvn clean install -DskipTestsBuilds the project but skips running tests. 8mvn dependency:treeDisplays the dependency hierarchy (useful for conflicts). 993. pom.xml Configuration Cheat SheetAdding Dependencies (e.g., GSON, JUnit)XML<dependencies>
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.10</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+Configuring Java Version (Compiler Plugin)Sets the Java compiler to version 17 10.XML<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>3.11.0</version>
+    <configuration>
+        <source>17</source>
+        <target>17</target>
+    </configuration>
+</plugin>
+Creating an Executable JARConfigures the maven-jar-plugin to define the Main Class 11.XML<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-jar-plugin</artifactId>
+    <configuration>
+        <archive>
+            <manifest>
+                <mainClass>com.example.Main</mainClass>
+            </manifest>
+        </archive>
+    </configuration>
+</plugin>
+Web Application ConfigurationFor Web Apps, change packaging to WAR and add Servlet API 12121212.XML<packaging>war</packaging>
+
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>4.0.1</version>
+    <scope>provided</scope> </dependency>
+4. Eclipse IDE Quick StepsCreate Simple Java ProjectFile > New > Project... > Maven Project 13.Select Archetype: maven-archetype-quickstart (Group ID: org.apache.maven.archetypes)14.Enter Group ID (e.g., SELAB1) and Artifact ID (e.g., JAVA1) 15.Run: Right-click App.java -> Run As -> Java Application16.Create Web ProjectFile > New > Project... > Maven Project.Select Archetype: maven-archetype-webapp17.Add javax.servlet-api dependency to pom.xml 18.Run: Right-click index.jsp -> Run As -> Run on Server (Select Tomcat) 19.5. Troubleshooting & Scenario SolutionsBuild Failure (Missing POM): If you see "goal you specified requires a project to execute but there is no POM," verify you are in the correct directory containing pom.xml 20.Unsupported Class Version: Indicates a Java version mismatch. Check the maven-compiler-plugin configuration in pom.xml (ensure source/target matches installed Java)21.Dependency Conflict: Use mvn dependency:tree to view the tree and exclude conflicting versions22222222.Applying a Patch: If a teammate sends a .patch file, use git apply bugfix.patch 23.Install Custom JAR: To use a 3rd party JAR not in a remote repo, use mvn install:install-file specifying file path, groupId, artifactId, and version 24.Change Build Output Directory: Modify the pom.xml to point to build_output/ instead of target/25
+
+
+
+Setup & Configuration
+
+
+git version: Check the installed Git version.
+
+
+git config --global user.name "Your Name": Set your username globally.
+
+
+git config --global user.email "email@example.com": Set your email globally.
+
+
+git config --list: List all Git configurations.
+
+Repository Initialization
+
+
+git init: Initialize a new local repository.
+
+
+git clone <url>: Clone an existing remote repository.
+
+Staging & Committing
+
+
+git status: Check the status of your working directory.
+
+
+git add .: Stage all changes in the directory.
+
+
+git add <file>: Stage a specific file.
+
+
+git commit -m "message": Commit staged changes with a message.
+
+
+git commit --amend -m "new message": Correct the last commit message.
+
+Branching & Merging
+
+
+git branch: List local branches.
+
+
+git branch -a: List all branches (local and remote).
+
+
+git branch -r: List remote branches.
+
+
+git branch <name>: Create a new branch.
+
+
+git checkout <name>: Switch to an existing branch.
+
+
+git checkout -b <name>: Create and switch to a new branch.
+
+
+git branch -d <name>: Delete a local branch (safe).
+
+
+git branch -D <name>: Force delete a local branch.
+
+
+git merge <name>: Merge a branch into the current branch.
+
+Remote Repository
+
+
+git remote -v: List remote repositories URLs.
+
+
+git remote add origin <url>: Add a new remote repository.
+
+
+git remote remove <name>: Remove a remote repository.
+
+
+git remote rename <old> <new>: Rename a remote.
+
+
+git remote set-url <name> <new_url>: Change the URL of a remote.
+
+
+git remote show <name>: Show detailed info about a remote.
+
+
+git remote prune origin: Remove local references to deleted remote branches.
+
+Syncing
+
+
+git push -u origin main: Push local commits to remote (first time setup).
+
+
+git push: Push commits to the remote branch.
+
+
+git pull: Fetch and merge changes from the remote.
+
+
+git fetch: Download remote changes without merging.
+
+Undoing Changes
+
+
+git restore <file>: Discard changes in working directory (unstaged).
+
+
+git restore --staged <file>: Unstage a file (keep changes in working dir).
+
+
+git reset <file>: Unstage a file.
+
+
+git revert <commit>: Create a new commit to undo specific changes.
+
+Inspection & History
+
+
+git log: Show commit history.
+
+
+git log --oneline: Show concise history.
+
+
+git diff: Show unstaged changes.
+
+
+git show <commit>: Show details of a specific commit.
+
+
+git blame <file>: Show who modified each line of a file.
+
+
+git reflog: Show a log of all references (useful for recovery).
+
+Advanced
+
+
+git stash: Temporarily save changes.
+
+
+git stash apply: Restore stashed changes.
+
+
+git rebase <remote>/<branch>: Rebase current branch onto another.
+
+
+git filter-branch: Rewrite history (e.g., remove sensitive files)
+
+Check version: git --version 
+
+
+Set username: git config --global user.name "Your Name" 
+
+
+Set email: git config --global user.email "youremail@example.com" 
+
+
+List config: git config --list 
+
+
+Initialize repo: git init 
+
+
+Clone repo: git clone <url> 
+
+Staging & Committing
+
+Check status: git status 
+
+
+Stage file: git add <filename> 
+
+
+Stage all files: git add . 
+
+
+Commit changes: git commit -m "message" 
+
+
+Fix last commit message: git commit --amend -m "new message" 
+
+Branching & Merging
+
+List branches: git branch or git branch -a 
+
+
+Create branch: git branch <branch_name> 
+
+
+Switch branch: git checkout <branch_name> 
+
+
+Create & switch: git checkout -b <new_branch> 
+
+
+Merge branch: git merge <branch_name> 
+
+
+Delete branch (safe): git branch -d <branch_name> 
+
+
+Force delete branch: git branch -D <branch_name> 
+
+
+Check merged branches: git branch --merged 
+
+Remote Repositories
+
+View remotes: git remote -v 
+
+
+Add remote: git remote add origin <url> 
+
+
+Remove remote: git remote remove <name> 
+
+
+Rename remote: git remote rename <old> <new> 
+
+
+Change remote URL: git remote set-url <name> <new_url> 
+
+
+Show remote info: git remote show <name> 
+
+
+Prune deleted branches: git remote prune origin 
+
+Syncing
+
+Push changes: git push <remote> <branch> 
+
+
+Push (set upstream): git push -u origin main 
+
+
+Pull changes: git pull <remote> <branch> 
+
+
+Fetch (no merge): git fetch <remote> 
+
+
+Rebase: git rebase <remote>/<branch> 
+
+Undoing & Inspecting
+
+View history: git log or git log --oneline 
+
+
+View changes (diff): git diff 
+
+
+Show specific commit: git show <commit> 
+
+
+Unstage file: git restore --staged <file> 
+
+
+Discard local changes: git restore <file> 
+
+
+Reset (unstaged): git reset <file> 
+
+
+Revert commit: git revert <commit> 
+
+
+View reflog (recovery): git reflog 
+
+
+Who changed line: git blame <file> 
+
+Advanced
+
+Stash changes: git stash 
+
+
+Apply stash: git stash apply 
+
+
+Remove history (sensitive): git filter-branch --force ... 
+
+
+Ignore files: Create a .gitignore file
