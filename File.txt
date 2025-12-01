@@ -1,140 +1,507 @@
-7. Implementation of Ping Service
-import java.net.*;
-import java.io.*;
-public class b {
-    public static void main(String[] args) {
-        String hostname = args[0];
-        try {
-            System.out.println("Pinging " + hostname + "...");
-            InetAddress inetAddress = InetAddress.getByName(hostname);
-            boolean isReachable = inetAddress.isReachable(5000);
-            if (isReachable) {
-                System.out.println("Host " + hostname + " is reachable.");
-                System.out.println("IP Address: " + inetAddress.getHostAddress());
-            } else {
-                System.out.println("Host " + hostname + " is not reachable.");
-            }
-        } catch (Exception e) {
-            System.out.println("Unknown host: " + hostname);
+1)Implement the data link layer framing methods such as character-stuffing and bit stuffing.
+
+#include <stdio.h>
+#include <string.h>
+#define FLAG '$'
+#define ESC '\\'
+
+void characterStuffing(char *input)
+{
+    printf("Character Stuffed Output: %c", FLAG);
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (input[i] == FLAG || input[i] == ESC)
+        {
+            printf("%c", ESC);
         }
+        printf("%c", input[i]);
     }
+    printf("%c\n", FLAG);
 }
 
-6. LEAKY BUCKET -PROGRAM
-#include <stdio.h>
-
-int main() {
-    int bucket_size, output_rate, input_packets, stored = 0, time;
-
-    printf("Enter bucket size: ");
-    scanf("%d", &bucket_size);
-
-    printf("Enter output rate (leak rate): ");
-    scanf("%d", &output_rate);
-
-    printf("Enter number of cycles (time units): ");
-    scanf("%d", &time);
-
-    while (time--) {
-        printf("\nEnter number of packets arriving: ");
-        scanf("%d", &input_packets);
-
-        // Check for overflow condition
-        if (stored + input_packets > bucket_size) {
-            printf("Bucket overflow! %d packets dropped.\n", (stored + input_packets) - bucket_size);
-            stored = bucket_size;
-        } else {
-            stored += input_packets;
+void bitStuffing(char *input)
+{
+    printf("Bit Stuffed Output: 01111110 "); 
+    int count = 0;
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (input[i] == '1')
+        {
+            count++;
+            printf("1");
+            if (count == 5)
+            { 
+                printf("0");
+                count = 0;
+            }
         }
-
-        printf("Packets currently in bucket: %d\n", stored);
-
-        // Leak / Send packets
-        if (stored >= output_rate) {
-            stored -= output_rate;
-            printf("Packets sent: %d\n", output_rate);
-        } else {
-            printf("Packets sent: %d\n", stored);
-            stored = 0;
+        else
+        {
+            printf("0");
+            count = 0;
         }
-
-        printf("Packets left in bucket after sending: %d\n", stored);
     }
-
+    printf(" 01111110\n"); 
+}
+int main()
+{
+    int choice;
+    char input[100];
+    printf("Choose Framing Method:\n1. Character Stuffing\n2. Bit Stuffing\nEnter your choice: ");
+    scanf("%d", &choice);
+    getchar(); 
+    printf("Enter the data string: ");
+    fgets(input, sizeof(input), stdin);
+    input[strcspn(input, "\n")] = 0; 
+    if (choice == 1)
+    {
+        characterStuffing(input);
+    }
+    else if (choice == 2)
+    {   
+        bitStuffing(input);
+    }
+    else
+    {
+        printf("Invalid choice!\n");
+    }
     return 0;
 }
 
-import java.util.Scanner;
+2	Write a program to compute CRC.
 
-public class LeakyBucket {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-
-        int bucketSize, outputRate, inputPackets, stored = 0, time;
-
-        System.out.print("Enter bucket size: ");
-        bucketSize = sc.nextInt();
-
-        System.out.print("Enter output rate (leak rate): ");
-        outputRate = sc.nextInt();
-
-        System.out.print("Enter number of cycles (time units): ");
-        time = sc.nextInt();
-
-        while (time-- > 0) {
-            System.out.print("\nEnter number of packets arriving: ");
-            inputPackets = sc.nextInt();
-
-            // Overflow check
-            if (stored + inputPackets > bucketSize) {
-                int dropped = (stored + inputPackets) - bucketSize;
-                System.out.println("Bucket overflow! " + dropped + " packets dropped.");
-                stored = bucketSize;
-            } else {
-                stored += inputPackets;
-            }
-
-            System.out.println("Packets currently in bucket: " + stored);
-
-            // Leak packets
-            if (stored >= outputRate) {
-                stored -= outputRate;
-                System.out.println("Packets sent: " + outputRate);
-            } else {
-                System.out.println("Packets sent: " + stored);
-                stored = 0;
-            }
-
-            System.out.println("Packets left in bucket after sending: " + stored);
-        }
-        
-        sc.close();
-    }
+#include <stdio.h>
+#include <string.h>
+#define N strlen(gen_poly)
+char data[28];
+char check_value[28];
+char gen_poly[10];
+int data_length, i, j;
+void XOR()
+{
+    for (j = 1; j < N; j++)
+        check_value[j] = ((check_value[j] == gen_poly[j]) ? '0' : '1');
+}
+void crc()
+{
+    for (i = 0; i < N; i++)
+        check_value[i] = data[i];
+    do
+    {
+        if (check_value[0] == '1')
+            XOR();
+        for (j = 0; j < N - 1; j++)
+            check_value[j] = check_value[j + 1];
+        check_value[j] = data[i++];
+    } while (i <= data_length + N - 1);
+}
+void receiver()
+{
+    printf("Enter the received data: ");
+    scanf("%s", data);
+    printf("\n-----------------------------\n");
+    printf("Data received: %s", data);
+    crc();
+    for (i = 0; (i < N - 1) && (check_value[i] != '1'); i++)
+        ;
+    if (i < N - 1)
+        printf("\nError detected\n\n");
+    else
+        printf("\nNo error detected\n\n");
+}
+int main()
+{
+    printf("\nEnter data to be transmitted: ");
+    scanf("%s", data);
+    printf("\n Enter the Generating polynomial: ");
+    scanf("%s", gen_poly);
+    data_length = strlen(data);
+    for (i = data_length; i < data_length + N - 1; i++)
+        data[i] = '0';
+    printf("\n----------------------------------------");
+    printf("\n Data padded with n-1 zeros : %s", data);
+    printf("\n----------------------------------------");
+    crc();
+    printf("\nCRC or Check value is : %s", check_value);
+    for (i = data_length; i < data_length + N - 1; i++)
+        data[i] = check_value[i - data_length];
+    printf("\n----------------------------------------");
+    printf("\n Final data to be sent : %s", data);
+    printf("\n----------------------------------------\n");
+    receiver();
+    return 0;
 }
 
 
 
-5. DNS
+3) GOback
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <time.h>
+#define WINDOW_SIZE 4   
+#define TOTAL_FRAMES 15 
+#define TIMEOUT 3       
+int send_frame(int frame)
+{
+    if (rand() % 5 == 0)
+    {
+        printf("[Sender] Frame %d lost during transmission.\n", frame);
+        return 0; 
+    }
+    printf("[Sender] Frame %d sent successfully.\n", frame);
+    return 1; 
+}
+int receive_ack(int frame)
+{
+    if (rand() % 7 == 0)
+    {
+        printf("[Receiver] ACK for Frame %d lost.\n", frame);
+        return 0; 
+    }
+    printf("[Receiver] ACK for Frame %d received successfully.\n", frame);
+    return 1; 
+}
+void sliding_window_protocol()
+{
+    int base = 0;
+    int next_frame = 0;           
+    int acks[TOTAL_FRAMES] = {0}; 
+    time_t timers[TOTAL_FRAMES]; 
+    while (base < TOTAL_FRAMES)
+    {
+        while (next_frame < base + WINDOW_SIZE && next_frame < TOTAL_FRAMES)
+        {
+            if (!acks[next_frame])
+            {
+                send_frame(next_frame);
+                timers[next_frame] = time(NULL); 
+            }
+            next_frame++;
+        }
+
+        for (int i = base; i < next_frame; i++)
+        {
+            if (acks[i])
+            {
+                continue; 
+            }
+            if (receive_ack(i))
+            {
+                acks[i] = 1; 
+                while (base < TOTAL_FRAMES && acks[base])
+                {
+                    printf("[Sender] Sliding window. Base frame is now %d.\n", base + 1);
+                        base++;
+                }
+            }
+            else
+            {
+                if (difftime(time(NULL), timers[i]) > TIMEOUT)
+                {
+                    printf("[Sender] Timeout for Frame %d. Resending all frames from %d.\n", i,base);
+                    next_frame = base;
+                    break;
+                }
+            }
+        }
+    }
+    printf("[Sender] All frames sent and acknowledged successfully.\n");
+}
+int main()
+{
+    srand(time(NULL)); 
+    printf("[Sender] Starting Sliding Window Protocol with Go-Back-N.\n");
+    sliding_window_protocol();
+    printf("[Sender] Transmission completed.\n");
+    return 0;
+}
+
+4	Take an example subnet of hosts and obtain a broadcast tree for the subnet.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+unsigned int ipToInt(char *ip)
+{
+    unsigned int a, b, c, d;
+    sscanf(ip, "%u.%u.%u.%u", &a, &b, &c, &d);
+    return (a << 24) | (b << 16) | (c << 8) | d;
+}
+void intToIp(unsigned int ip, char *buffer)
+{
+    sprintf(buffer, "%u.%u.%u.%u", (ip >> 24) & 0xFF, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+}
+unsigned int calculateSubnetMask(int prefixLength)
+{
+    return prefixLength == 0 ? 0 : ~((1 << (32 - prefixLength)) - 1);
+}
+int main()
+{
+    char ip[16];
+    int prefixLength, newPrefixLength;
+    unsigned int subnetMask, newSubnetMask, ipInt;
+    char buffer[16];
+    printf("Enter IP address (e.g., 192.168.1.0): ");
+    scanf("%s", ip);
+    printf("Enter current prefix length (e.g., 24): ");
+    scanf("%d", &prefixLength);
+    newPrefixLength = prefixLength + 1;
+    ipInt = ipToInt(ip);
+    subnetMask = calculateSubnetMask(prefixLength);
+    newSubnetMask = calculateSubnetMask(newPrefixLength);
+    int hostsPerSubnet = (1 << (32 - newPrefixLength)) - 2;
+    printf("\nNumber of subnets: 2\n");
+    printf("Number of hosts per subnet: %d\n", hostsPerSubnet);
+    for (int i = 0; i < 2; i++)
+    {
+        unsigned int subnetNetwork = (ipInt & subnetMask) | (i << (32 -
+                                                                   newPrefixLength));
+        unsigned int subnetBroadcast = subnetNetwork | ~newSubnetMask;
+        unsigned int firstHost = subnetNetwork + 1;
+        unsigned int lastHost = subnetBroadcast - 1;
+        printf("\nSubnet %d:\n", i + 1);
+        printf("Network Address: ");
+        intToIp(subnetNetwork, buffer);
+        printf("%s\n", buffer);
+        printf("Broadcast Address: ");
+        intToIp(subnetBroadcast, buffer);
+        printf("%s\n", buffer);
+        printf("Subnet Mask: ");
+        intToIp(newSubnetMask, buffer);
+        printf("%s\n", buffer);
+        printf("First Host: ");
+        intToIp(firstHost, buffer);
+        printf("%s\n", buffer);
+        printf("Last Host: ");
+        intToIp(lastHost, buffer);
+        printf("%s\n", buffer);
+    }
+    return 0;
+}
+
+5) Distance Vector Routing Algorithm
+#include <stdio.h>
+#include <stdlib.h>
+#define INF 9999
+#define MAX_NODES 10
+void initialize(int numNodes, int costMatrix[MAX_NODES][MAX_NODES], int distVector[MAX_NODES][MAX_NODES], int nextHop[MAX_NODES][MAX_NODES])
+{
+    for (int i = 0; i < numNodes; i++)
+    {
+        for (int j = 0; j < numNodes; j++)
+        {
+            distVector[i][j] = costMatrix[i][j];
+            if (costMatrix[i][j] != INF && i != j)
+            {
+                nextHop[i][j] = j;
+            }
+            else
+            {
+                nextHop[i][j] = -1;
+            }
+        }
+    }
+}
+void printRoutingTable(int numNodes, int distVector[MAX_NODES][MAX_NODES], int nextHop[MAX_NODES][MAX_NODES])
+{
+    for (int i = 0; i < numNodes; i++)
+    {
+        printf("Routing table for node %d:\n", i);
+        printf("Destination\tNext Hop\tDistance\n");
+        for (int j = 0; j < numNodes; j++)
+        {
+            if (distVector[i][j] == INF)
+            {
+                printf("%d\t\t-\t\tINF\n", j);
+            }
+            else
+            {
+                printf("%d\t\t%d\t\t%d\n", j, nextHop[i][j], distVector[i][j]);
+            }
+        }
+        printf("\n");
+    }
+}
+void distanceVectorRouting(int numNodes, int costMatrix[MAX_NODES][MAX_NODES], int distVector[MAX_NODES][MAX_NODES], int nextHop[MAX_NODES][MAX_NODES])
+{
+    int updated;
+    do
+    {
+        updated = 0;
+        for (int i = 0; i < numNodes; i++)
+        {
+            for (int j = 0; j < numNodes; j++)
+            {
+                for (int k = 0; k < numNodes; k++)
+                {
+                    if (distVector[i][k] + distVector[k][j] < distVector[i][j])
+                    {
+                        distVector[i][j] = distVector[i][k] + distVector[k][j];
+                        nextHop[i][j] = nextHop[i][k];
+                        updated = 1;
+                    }
+                }
+            }
+        }
+    } while (updated);
+}
+int main()
+{
+    int numNodes, costMatrix[MAX_NODES][MAX_NODES];
+    int distVector[MAX_NODES][MAX_NODES];
+    int nextHop[MAX_NODES][MAX_NODES];
+    printf("Enter the number of nodes: ");
+    scanf("%d", &numNodes);
+    printf("Enter the cost matrix (use %d for INF):\n", INF);
+    for (int i = 0; i < numNodes; i++)
+    {
+        for (int j = 0; j < numNodes; j++)
+        {
+            scanf("%d", &costMatrix[i][j]);
+        }
+    }
+    initialize(numNodes, costMatrix, distVector, nextHop);
+    distanceVectorRouting(numNodes, costMatrix, distVector, nextHop);
+    printRoutingTable(numNodes, distVector, nextHop);
+    return 0;
+}
+
+
+6) Dijkstra's Algorithm
+#include <stdio.h>
+#define INFINITY 9999
+#define MAX 10
+void Dijkstra(int Graph[MAX][MAX], int n, int start)
+{
+    int cost[MAX][MAX], distance[MAX], pred[MAX];
+    int visited[MAX], count, mindistance, nextnode, i, j;
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            cost[i][j] = (Graph[i][j] == 0) ? INFINITY : Graph[i][j];
+    for (i = 0; i < n; i++)
+    {
+        distance[i] = cost[start][i];
+        pred[i] = start;
+        visited[i] = 0;
+    }
+    distance[start] = 0;
+    visited[start] = 1;
+
+    count = 1;
+
+    while (count < n - 1)
+    {
+        mindistance = INFINITY;
+        for (i = 0; i < n; i++)
+            if (distance[i] < mindistance && !visited[i])
+            {
+                mindistance = distance[i];
+                nextnode = i;
+            }
+        visited[nextnode] = 1;
+        for (i = 0; i < n; i++)
+            if (!visited[i])
+                if (mindistance + cost[nextnode][i] < distance[i])
+                {
+                    distance[i] = mindistance + cost[nextnode][i];
+                    pred[i] = nextnode;
+                }
+        count++;
+    }
+
+    for (i = 0; i < n; i++)
+        if (i != start)
+            printf("\nDistance from source to %d: %d", i, distance[i]);
+}
+
+int main()
+{
+    int Graph[MAX][MAX] = {
+        {0, 0, 1, 2, 0, 0, 0},
+        {0, 0, 2, 0, 0, 3, 0},
+        {1, 2, 0, 1, 3, 0, 0},
+        {2, 0, 1, 0, 0, 0, 1},
+        {0, 0, 3, 0, 0, 2, 0},
+        {0, 3, 0, 0, 2, 0, 1},
+        {0, 0, 0, 1, 0, 1, 0}};
+    int n = 7, u = 0;
+    Dijkstra(Graph, n, u);
+    return 0;
+}
+
+7) Leaky Bucket Algorithm
+#include <stdio.h>
+int main()
+{
+    int bucket_size, output_rate, input_packets, stored = 0, time;
+    printf("Enter bucket size: ");
+    scanf("%d", &bucket_size);
+    printf("Enter output rate (leak rate): ");
+    scanf("%d", &output_rate);
+    printf("Enter number of cycles (time units): ");
+    scanf("%d", &time);
+    while (time--)
+    {
+        printf("\nEnter number of packets arriving: ");
+        scanf("%d", &input_packets);
+        if (stored + input_packets > bucket_size)
+        {
+            printf("Bucket overflow! %d packets dropped.\n", (stored + input_packets) - bucket_size);
+            stored = bucket_size;
+        }
+        else
+        {
+            stored += input_packets;
+        }
+        printf("Packets currently in bucket: %d\n", stored);
+        if (stored >= output_rate)
+        {
+            stored -= output_rate;
+            printf("Packets sent: %d\n", output_rate);
+        }
+        else
+        {
+            printf("Packets sent: %d\n", stored);
+            stored = 0;
+        }
+        printf("Packets left in bucket after sending: %d\n", stored);
+    }
+    return 0;
+}
+
+8) Simple DNS Resolver
 import java.net.*;
 import java.util.Scanner;
-public class DNS {
-    public static void main(String[] args) {
+public class dns
+{
+    public static void main(String[] args)
+    {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to the Simple DNS Resolver!");
         System.out.println("Enter a domain name to resolve (or type 'exit' to quit):");
-        while (true) {
+        while (true)
+        {
             System.out.print("Domain: ");
             String domain = scanner.nextLine();
-            if ("exit".equalsIgnoreCase(domain)) {
+            if ("exit".equalsIgnoreCase(domain))
+            {
                 System.out.println("Exiting DNS Resolver. Goodbye!");
                 break;
             }
-            try {
+            try
+            {
                 InetAddress[] addresses = InetAddress.getAllByName(domain);
                 System.out.println("IP addresses for " + domain + ":");
-                for (InetAddress address : addresses) {
+                for (InetAddress address : addresses)
+                {
                     System.out.println(" - " + address.getHostAddress());
                 }
-            } catch (UnknownHostException e) {
+            }
+            catch(UnknownHostException e)
+            {
                 System.out.println("Could not resolve domain: " + e.getMessage());
             }
         }
@@ -142,296 +509,80 @@ public class DNS {
     }
 }
 
-
-4.Djkstras
-#include <stdio.h>
-#include <limits.h>
-#include <stdbool.h>
-#define V 7  
-int minDistance(int dist[], bool sptSet[]) {
-    int min = INT_MAX, min_index = -1;
-    for (int v = 0; v < V; v++)
-        if (!sptSet[v] && dist[v] <= min)
-            min = dist[v], min_index = v;
-    return min_index;
-}
-void dijkstra(int graph[V][V], int src) {
-    int dist[V];
-    bool sptSet[V];
-    for (int i = 0; i < V; i++)
-        dist[i] = INT_MAX, sptSet[i] = false;
-    dist[src] = 0;
-    for (int count = 0; count < V - 1; count++) {
-        int u = minDistance(dist, sptSet);
-        sptSet[u] = true;
-        for (int v = 0; v < V; v++)
-            if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX
-                && dist[u] + graph[u][v] < dist[v])
-                dist[v] = dist[u] + graph[u][v];
-    }
-    for (int i = 1; i < V; i++)
-        printf("Distance from source to %d: %d\n", i, dist[i]);
-}
-int main() {
-    int source = 0;
-
-    // printf("Graph (7 nodes, source: 0):\n");
-    // for (int i = 0; i < V; i++) {
-    //     for (int j = 0; j < V; j++) {
-    //         char ch;
-    //         while (scanf("%c", &ch) == 1 && (ch < '0' || ch > '9')) {}
-    //         ungetc(ch, stdin);
-    //         scanf("%d", &graph[i][j]);
-    //     }
-    // }
-int graph[V][V]={{0, 0, 1, 2, 0, 0, 0},
-{0, 0, 2, 0, 0, 3, 0},
-{1, 2, 0, 1, 3, 0, 0},
-{2, 0, 1, 0, 0, 0, 1},
-{0, 0, 3, 0, 0, 2, 0},
-{0, 3, 0, 0, 2, 0, 1},
-{0, 0, 0, 1, 0, 1, 0}};
-    dijkstra(graph, source);
-    return 0;
-}
-
-
-import java.util.*;
-
-public class SimpleDijkstra {
-
-    public static void main(String[] args) {
-
-        Scanner sc = new Scanner(System.in);
-
-        System.out.print("Enter number of nodes: ");
-        int n = sc.nextInt();
-
-        int[][] graph = new int[n][n];
-
-        System.out.println("Enter adjacency matrix (0 = no edge):");
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                graph[i][j] = sc.nextInt();
-            }
+9) Ping Service
+import java.net.*;
+import java.io.*;
+public class ping
+{
+    public static void main(String[] args)
+    {
+        if (args.length != 1)
+        {
+            System.out.println("Usage: java PingService <hostname>");
+            return;
         }
-
-        System.out.print("Enter the source node: ");
-        int src = sc.nextInt();
-
-        int[] dist = new int[n];
-        boolean[] visited = new boolean[n];
-
-        // initialize distances
-        Arrays.fill(dist, Integer.MAX_VALUE);
-        dist[src] = 0;
-
-        // main Dijkstra logic
-        for (int count = 0; count < n - 1; count++) {
-
-            int minNode = -1;
-            int minDist = Integer.MAX_VALUE;
-
-            // pick unvisited node with smallest distance
-            for (int i = 0; i < n; i++) {
-                if (!visited[i] && dist[i] < minDist) {
-                    minDist = dist[i];
-                    minNode = i;
-                }
+        String hostname = args[0]; 
+        try
+        {
+            System.out.println("Pinging " + hostname + "...");
+            InetAddress inetAddress = InetAddress.getByName(hostname);
+            boolean isReachable = inetAddress.isReachable(5000);
+            if (isReachable)
+            {
+                System.out.println("Host " + hostname + " is reachable.");
+                System.out.println("IP Address: " + inetAddress.getHostAddress());
             }
-
-            visited[minNode] = true;
-
-            // relax edges
-            for (int v = 0; v < n; v++) {
-                if (graph[minNode][v] != 0 && !visited[v]) {
-                    int newDist = dist[minNode] + graph[minNode][v];
-
-                    if (newDist < dist[v]) {
-                        dist[v] = newDist;
-                    }
-                }
-            }
-        }
-
-        // print output
-        System.out.println("\nShortest distances from source " + src + ":");
-        for (int i = 0; i < n; i++) {
-            System.out.println("To node " + i + ": " + dist[i]);
-        }
-
-        sc.close();
-    }
-}
-
-3. DVR
-
-#include <stdio.h>
-#define INF 9999
-#define MAX 10
-struct node {
-    int dist[MAX];
-    int nextHop[MAX];
-} rt[MAX];
-int main() {
-    int cost[MAX][MAX];
-    int n;
-    printf("Enter the number of nodes: ");
-    scanf("%d", &n);
-    printf("Enter the cost matrix (use 9999 for INF):\n");
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++) {
-            scanf("%d", &cost[i][j]);
-            rt[i].dist[j] = cost[i][j];
-            if (cost[i][j] != 9999 && i != j)
-                rt[i].nextHop[j] = j;
             else
-                rt[i].nextHop[j] = -1;
-        }
-    int updated;
-    do {
-        updated = 0;
-        for (int i = 0; i < n; i++) { 
-            for (int j = 0; j < n; j++) { 
-                for (int k = 0; k < n; k++) { 
-                    if (rt[i].dist[j] > cost[i][k] + rt[k].dist[j]) {
-                        rt[i].dist[j] = cost[i][k] + rt[k].dist[j];
-                        rt[i].nextHop[j] = k;
-                        updated = 1;
-                    }
-                }
+            {
+                System.out.println("Host " + hostname + " is not reachable.");
             }
         }
-    } while (updated);
-    for (int i = 0; i < n; i++) {
-        printf("\nRouting table for node %d:\n", i);
-        printf("Destination\tNext Hop\tDistance\n");
-        for (int j = 0; j < n; j++)
-            printf("%d\t\t%d\t\t%d\n", j, rt[i].nextHop[j], rt[i].dist[j]);
+        catch(UnknownHostException e)
+        {
+            System.out.println("Unknown host: " + hostname);
+        }
+        catch(IOException e)
+        {
+            System.out.println("Error occurred while pinging " + hostname + ": " +e.getMessage());
+        }
+    }
+}
+
+10) Write a program to perform bitwise AND and XOR operation with 127 on each character of a given string and display the results.
+#include <stdio.h>
+int main()
+{
+    char str[100];
+    int i;
+    printf("Enter a string: ");
+    fgets(str, sizeof(str), stdin); // reads a line of text including spaces
+    printf("\nOriginal String: %s\n", str);
+    printf("Character\tASCII\tAND(127)\tXOR(127)\n");
+    printf("---------------------------------------------\n");
+    for (i = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] == '\n') 
+            continue;
+        char and_result = str[i] & 127; 
+        char xor_result = str[i] ^ 127; 
+        printf(" %c\t\t%d\t   %d\t\t   %d\n", str[i], str[i], and_result, xor_result);
     }
     return 0;
 }
 
 
-import java.util.Scanner;
-
-public class DistanceVectorRouting {
-
-    static final int INF = 9999;
-
-    public static void main(String[] args) {
-
-        Scanner sc = new Scanner(System.in);
-
-        System.out.print("Enter the number of nodes: ");
-        int n = sc.nextInt();
-
-        int[][] cost = new int[n][n];
-        int[][] dist = new int[n][n];
-        int[][] nextHop = new int[n][n];
-
-        System.out.println("Enter the cost matrix (use 9999 for INF):");
-
-        // Input and initialization
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                cost[i][j] = sc.nextInt();
-                if (i == j) cost[i][j] = 0;
-
-                dist[i][j] = cost[i][j];
-
-                if (cost[i][j] != 0 && cost[i][j] != INF)
-                    nextHop[i][j] = j;
-                else
-                    nextHop[i][j] = -1;
-            }
-        }
-
-        // Distance Vector Algorithm
-        boolean updated;
-        do {
-            updated = false;
-
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    for (int k = 0; k < n; k++) {
-
-                        if (dist[i][j] > cost[i][k] + dist[k][j]) {
-                            dist[i][j] = cost[i][k] + dist[k][j];
-                            nextHop[i][j] = k;
-                            updated = true;
-                        }
-                    }
-                }
-            }
-
-        } while (updated);
-
-        // Print Routing Tables
-        for (int i = 0; i < n; i++) {
-            System.out.println("\nRouting table for node " + i + ":");
-            System.out.println("Destination\tNext Hop\tDistance");
-
-            for (int j = 0; j < n; j++) {
-                System.out.println(j + "\t\t" + nextHop[i][j] + "\t\t" + dist[i][j]);
-            }
-        }
-
-        sc.close();
+11) Write a program to perform XOR on a given string with 0 and display the result.
+#include <stdio.h>
+int main()
+{
+    char str[100]; 
+    int i = 0;
+    printf("Enter a string: ");
+    fgets(str, sizeof(str), stdin); 
+    while (str[i] != '\0')
+    {
+        printf("%c", str[i] ^ 2); 
+        i++;
     }
+    return 0;
 }
-
-1.Subnetting
-import java.util.*;
-public class Subnetting {
-    public static int iptoint(String ip){
-        String[] parts=ip.split("\\.");
-        int result=0;
-        for(int i=0;i<4;i++){
-            result=(result<<8)|Integer.parseInt(parts[i]);
-        }
-        return result;
-    }
-    public static String inttoip(int ip){
-        return ((ip>>>24)&0xFF)+"."+((ip>>>16)&0xFF)+"."+((ip>>>8)&0xFF)+"."+(ip&0xFF);
-    } 
-    public static void main(String args[]){
-        Scanner sc=new Scanner(System.in);
-        String ip=sc.nextLine();
-        int mask=sc.nextInt();
-        int ipint=iptoint(ip);
-        int maskint=mask==0?0:0xFFFFFFFF<<(32-mask);
-        int network=ipint & maskint;
-        int broadcast=network|~maskint;
-        System.out.println("Network Address: "+inttoip(network));
-        int hostcount=(int)Math.pow(2,32-maskint)-2;
-        System.out.println("Number of Hosts: "+hostcount);
-        System.out.println("Broadcast Address: "+inttoip(broadcast));
-        int firsthost=network+1;
-        int lasthost=broadcast-1;
-        System.out.println("first host:"+inttoip(firsthost));
-        System.out.println("last host:"+inttoip(lasthost));
-        sc.close();
-    }
-}
-DHCP
-Router(config)# ip dhcp excluded-address 192.168.1.1 192.168.1.10
-Router(config)# ip dhcp pool LAN_POOL
-Router(dhcp-config)# network 192.168.1.0 255.255.255.0
-Router(dhcp-config)# default-router 192.168.1.1
-Router(dhcp-config)# dns-server 8.8.8.8
-Router(dhcp-config)# exit
-
-Subnetting
-Router> enable
-Router# configure terminal
-Router(config)# interface gigabitEthernet0/0
-Router(config-if)# ip address 192.168.10.1 255.255.255.192
-Router(config-if)# no shutdown
-
-Router(config)# interface gigabitEthernet0/1
-Router(config-if)# ip address 192.168.10.65 255.255.255.192
-Router(config-if)# no shutdown
-Router(config)# end
-
-
