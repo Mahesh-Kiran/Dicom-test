@@ -1,588 +1,709 @@
-1)Implement the data link layer framing methods such as character-stuffing and bit stuffing.
-
-#include <stdio.h>
-#include <string.h>
-#define FLAG '$'
-#define ESC '\\'
-
-void characterStuffing(char *input)
-{
-    printf("Character Stuffed Output: %c", FLAG);
-    for (int i = 0; i < strlen(input); i++)
-    {
-        if (input[i] == FLAG || input[i] == ESC)
-        {
-            printf("%c", ESC);
-        }
-        printf("%c", input[i]);
+const readline = require('readline');
+var RL = readline.createInterface(process.stdin, process.stdout);
+RL.question('Please Enter Text:  ', (name) => {
+    let x = name;
+    let y = "";
+    for (let i = 0; i < x.length; i++) {
+        if (x.charAt(i) >= 'A' && x.charAt(i) <= 'Z')
+            y = y + x.charAt(i).toLowerCase();
+        else if (x.charAt(i) >= 'a' && x.charAt(i) <= 'z')
+            y = y + x.charAt(i).toUpperCase();
     }
-    printf("%c\n", FLAG);
-}
+    console.log(`Output is is ${y}`);
+}); 
 
-void bitStuffing(char *input)
-{
-    printf("Bit Stuffed Output: 01111110 "); 
-    int count = 0;
-    for (int i = 0; i < strlen(input); i++)
-    {
-        if (input[i] == '1')
-        {
-            count++;
-            printf("1");
-            if (count == 5)
-            { 
-                printf("0");
-                count = 0;
-            }
+
+var arr1 = [3, 'a', 'a', 'a', 2, 3, 'a', 3, 'a', 2, 4, 9, 3];
+var mf = 1;
+var m = 0;
+var item;
+for (var i = 0; i < arr1.length - 1; i++) {
+    for (var j = i; j < arr1.length; j++) {
+        if (arr1[i] == arr1[j])
+            m++;
+        if (mf < m) {
+            mf = m;
+            item = arr1[i];
         }
+    }
+    m = 0;
+}
+console.log(item + " ( " + mf + " times ) "); 
+
+
+function removeDuplicates(num) {
+    len = num.length;
+    uniqueChars = [];
+    num.forEach((c) => {
+        if (!uniqueChars.includes(c)) {
+            uniqueChars.push(c);
+        }
+    });
+    return uniqueChars;
+}
+let Mynum = [1, 2, 2, 4, 5, 4, 7, 8, 7, 3, 6];
+result = removeDuplicates(Mynum);
+console.log("Original List:   " + Mynum);
+console.log("Unique List:    " + result); 
+
+let iterativeFunction = function (arr, x) {
+    let start = 0, end = arr.length - 1;
+    while (start <= end) {
+        let mid = Math.floor((start + end) / 2);
+        if (arr[mid] === x) return true;
+        else if (arr[mid] < x)
+            start = mid + 1;
         else
-        {
-            printf("0");
-            count = 0;
-        }
+            end = mid - 1;
     }
-    printf(" 01111110\n"); 
+    return false;
 }
-int main()
-{
-    int choice;
-    char input[100];
-    printf("Choose Framing Method:\n1. Character Stuffing\n2. Bit Stuffing\nEnter your choice: ");
-    scanf("%d", &choice);
-    getchar(); 
-    printf("Enter the data string: ");
-    fgets(input, sizeof(input), stdin);
-    input[strcspn(input, "\n")] = 0; 
-    if (choice == 1)
-    {
-        characterStuffing(input);
-    }
-    else if (choice == 2)
-    {   
-        bitStuffing(input);
-    }
-    else
-    {
-        printf("Invalid choice!\n");
-    }
-    return 0;
-}
-
-2	Write a program to compute CRC.
-
-#include <stdio.h>
-#include <string.h>
-#define N strlen(gen_poly)
-char data[28];
-char check_value[28];
-char gen_poly[10];
-int data_length, i, j;
-void XOR()
-{
-    for (j = 1; j < N; j++)
-        check_value[j] = ((check_value[j] == gen_poly[j]) ? '0' : '1');
-}
-void crc()
-{
-    for (i = 0; i < N; i++)
-        check_value[i] = data[i];
-    do
-    {
-        if (check_value[0] == '1')
-            XOR();
-        for (j = 0; j < N - 1; j++)
-            check_value[j] = check_value[j + 1];
-        check_value[j] = data[i++];
-    } while (i <= data_length + N - 1);
-}
-void receiver()
-{
-    printf("Enter the received data: ");
-    scanf("%s", data);
-    printf("\n-----------------------------\n");
-    printf("Data received: %s", data);
-    crc();
-    for (i = 0; (i < N - 1) && (check_value[i] != '1'); i++)
-        ;
-    if (i < N - 1)
-        printf("\nError detected\n\n");
-    else
-        printf("\nNo error detected\n\n");
-}
-int main()
-{
-    printf("\nEnter data to be transmitted: ");
-    scanf("%s", data);
-    printf("\n Enter the Generating polynomial: ");
-    scanf("%s", gen_poly);
-    data_length = strlen(data);
-    for (i = data_length; i < data_length + N - 1; i++)
-        data[i] = '0';
-    printf("\n----------------------------------------");
-    printf("\n Data padded with n-1 zeros : %s", data);
-    printf("\n----------------------------------------");
-    crc();
-    printf("\nCRC or Check value is : %s", check_value);
-    for (i = data_length; i < data_length + N - 1; i++)
-        data[i] = check_value[i - data_length];
-    printf("\n----------------------------------------");
-    printf("\n Final data to be sent : %s", data);
-    printf("\n----------------------------------------\n");
-    receiver();
-    return 0;
-}
+let arr = [1, 3, 5, 7, 8, 9];
+let x = 5;
+console.log(iterativeFunction(arr, x));
 
 
 
-3) GOback
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <time.h>
-#define WINDOW_SIZE 4   
-#define TOTAL_FRAMES 15 
-#define TIMEOUT 3       
-int send_frame(int frame)
-{
-    if (rand() % 5 == 0)
-    {
-        printf("[Sender] Frame %d lost during transmission.\n", frame);
-        return 0; 
-    }
-    printf("[Sender] Frame %d sent successfully.\n", frame);
-    return 1; 
-}
-int receive_ack(int frame)
-{
-    if (rand() % 7 == 0)
-    {
-        printf("[Receiver] ACK for Frame %d lost.\n", frame);
-        return 0; 
-    }
-    printf("[Receiver] ACK for Frame %d received successfully.\n", frame);
-    return 1; 
-}
-void sliding_window_protocol()
-{
-    int base = 0;
-    int next_frame = 0;           
-    int acks[TOTAL_FRAMES] = {0}; 
-    time_t timers[TOTAL_FRAMES]; 
-    while (base < TOTAL_FRAMES)
-    {
-        while (next_frame < base + WINDOW_SIZE && next_frame < TOTAL_FRAMES)
-        {
-            if (!acks[next_frame])
-            {
-                send_frame(next_frame);
-                timers[next_frame] = time(NULL); 
+let object = {
+    name: 'Jack',
+    age: 25,
+    college: 'KMIT',
+    year: 3,
+    sem: 1
+};
+let properties = Object.keys(object)
+console.log(properties); 
+
+let object = {
+    name: 'Jack',
+    age: 25,
+    college: 'KMIT',
+    year: 3,
+    sem: 1
+};
+console.log(object.hasOwnProperty('name'));
+
+let object1 = {
+    name: 'Jack',
+    age: 25,
+    college: 'KMIT', year: 3, sem: 1
+};
+console.log('name' in object1);
+
+
+let object2 = {
+    name: 'Jack',
+    age: 25,
+    college: 'KMIT', year: 3, sem: 1
+};
+console.log(object2.name);
+console.log(object2.fee); 
+
+
+
+function quick_Sort(origArray) {
+    if (origArray.length <= 1) {
+        return origArray;
+    } else {
+
+        var left = [];
+        var right = [];
+        var newArray = [];
+        var pivot = origArray.pop();
+        var length = origArray.length;
+
+        for (var i = 0; i < length; i++) {
+            if (origArray[i] <= pivot) {
+                left.push(origArray[i]);
+            } else {
+                right.push(origArray[i]);
             }
-            next_frame++;
         }
 
-        for (int i = base; i < next_frame; i++)
-        {
-            if (acks[i])
-            {
-                continue; 
-            }
-            if (receive_ack(i))
-            {
-                acks[i] = 1; 
-                while (base < TOTAL_FRAMES && acks[base])
-                {
-                    printf("[Sender] Sliding window. Base frame is now %d.\n", base + 1);
-                        base++;
-                }
-            }
-            else
-            {
-                if (difftime(time(NULL), timers[i]) > TIMEOUT)
-                {
-                    printf("[Sender] Timeout for Frame %d. Resending all frames from %d.\n", i,base);
-                    next_frame = base;
-                    break;
-                }
+        return newArray.concat(quick_Sort(left), pivot, quick_Sort(right));
+    }
+}
+
+var myArray = [3, 0, 2, 5, -1, 4, 1];
+
+console.log("Original array: " + myArray);
+var sortedArray = quick_Sort(myArray);
+console.log("Sorted array: " + sortedArray); 
+
+
+
+function swap(arr, first_Index, second_Index) {
+    var temp = arr[first_Index];
+    arr[first_Index] = arr[second_Index];
+    arr[second_Index] = temp;
+}
+function bubble_Sort(arr) {
+    var len = arr.length,
+        i, j, stop;
+    for (i = 0; i < len; i++) {
+        for (j = 0, stop = len - i; j < stop; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr, j, j + 1);
             }
         }
     }
-    printf("[Sender] All frames sent and acknowledged successfully.\n");
+    return arr;
 }
-int main()
-{
-    srand(time(NULL)); 
-    printf("[Sender] Starting Sliding Window Protocol with Go-Back-N.\n");
-    sliding_window_protocol();
-    printf("[Sender] Transmission completed.\n");
-    return 0;
-}
-
-4	Take an example subnet of hosts and obtain a broadcast tree for the subnet.
+myArray = [3, 0, 2, 5, -1, 4, 1];
+console.log("Original array: " + myArray);
+var sortedArray = bubble_Sort(myArray);
+console.log("Sorted array: " + sortedArray); 
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-unsigned int ipToInt(char *ip)
-{
-    unsigned int a, b, c, d;
-    sscanf(ip, "%u.%u.%u.%u", &a, &b, &c, &d);
-    return (a << 24) | (b << 16) | (c << 8) | d;
-}
-void intToIp(unsigned int ip, char *buffer)
-{
-    sprintf(buffer, "%u.%u.%u.%u", (ip >> 24) & 0xFF, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
-}
-unsigned int calculateSubnetMask(int prefixLength)
-{
-    return prefixLength == 0 ? 0 : ~((1 << (32 - prefixLength)) - 1);
-}
-int main()
-{
-    char ip[16];
-    int prefixLength, newPrefixLength;
-    unsigned int subnetMask, newSubnetMask, ipInt;
-    char buffer[16];
-    printf("Enter IP address (e.g., 192.168.1.0): ");
-    scanf("%s", ip);
-    printf("Enter current prefix length (e.g., 24): ");
-    scanf("%d", &prefixLength);
-    newPrefixLength = prefixLength + 1;
-    ipInt = ipToInt(ip);
-    subnetMask = calculateSubnetMask(prefixLength);
-    newSubnetMask = calculateSubnetMask(newPrefixLength);
-    int hostsPerSubnet = (1 << (32 - newPrefixLength)) - 2;
-    printf("\nNumber of subnets: 2\n");
-    printf("Number of hosts per subnet: %d\n", hostsPerSubnet);
-    for (int i = 0; i < 2; i++)
-    {
-        unsigned int subnetNetwork = (ipInt & subnetMask) | (i << (32 -
-                                                                   newPrefixLength));
-        unsigned int subnetBroadcast = subnetNetwork | ~newSubnetMask;
-        unsigned int firstHost = subnetNetwork + 1;
-        unsigned int lastHost = subnetBroadcast - 1;
-        printf("\nSubnet %d:\n", i + 1);
-        printf("Network Address: ");
-        intToIp(subnetNetwork, buffer);
-        printf("%s\n", buffer);
-        printf("Broadcast Address: ");
-        intToIp(subnetBroadcast, buffer);
-        printf("%s\n", buffer);
-        printf("Subnet Mask: ");
-        intToIp(newSubnetMask, buffer);
-        printf("%s\n", buffer);
-        printf("First Host: ");
-        intToIp(firstHost, buffer);
-        printf("%s\n", buffer);
-        printf("Last Host: ");
-        intToIp(lastHost, buffer);
-        printf("%s\n", buffer);
-    }
-    return 0;
-}
 
-5) Distance Vector Routing Algorithm
-#include <stdio.h>
-#include <stdlib.h>
-#define INF 9999
-#define MAX_NODES 10
-void initialize(int numNodes, int costMatrix[MAX_NODES][MAX_NODES], int distVector[MAX_NODES][MAX_NODES], int nextHop[MAX_NODES][MAX_NODES])
-{
-    for (int i = 0; i < numNodes; i++)
-    {
-        for (int j = 0; j < numNodes; j++)
-        {
-            distVector[i][j] = costMatrix[i][j];
-            if (costMatrix[i][j] != INF && i != j)
-            {
-                nextHop[i][j] = j;
-            }
-            else
-            {
-                nextHop[i][j] = -1;
-            }
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Convert JSON Data to HTML Table</title>
+    <style>
+        th, td, p, input {
+            font: 14px Verdana;
         }
-    }
-}
-void printRoutingTable(int numNodes, int distVector[MAX_NODES][MAX_NODES], int nextHop[MAX_NODES][MAX_NODES])
-{
-    for (int i = 0; i < numNodes; i++)
-    {
-        printf("Routing table for node %d:\n", i);
-        printf("Destination\tNext Hop\tDistance\n");
-        for (int j = 0; j < numNodes; j++)
-        {
-            if (distVector[i][j] == INF)
-            {
-                printf("%d\t\t-\t\tINF\n", j);
-            }
-            else
-            {
-                printf("%d\t\t%d\t\t%d\n", j, nextHop[i][j], distVector[i][j]);
-            }
+
+        table, th, td {
+            border: solid 2px #DDD;
+            border-collapse: collapse;
+            padding: 2px 3px;
+            text-align: center;
         }
-        printf("\n");
-    }
-}
-void distanceVectorRouting(int numNodes, int costMatrix[MAX_NODES][MAX_NODES], int distVector[MAX_NODES][MAX_NODES], int nextHop[MAX_NODES][MAX_NODES])
-{
-    int updated;
-    do
-    {
-        updated = 0;
-        for (int i = 0; i < numNodes; i++)
-        {
-            for (int j = 0; j < numNodes; j++)
-            {
-                for (int k = 0; k < numNodes; k++)
-                {
-                    if (distVector[i][k] + distVector[k][j] < distVector[i][j])
-                    {
-                        distVector[i][j] = distVector[i][k] + distVector[k][j];
-                        nextHop[i][j] = nextHop[i][k];
-                        updated = 1;
+
+        th {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="button" onclick="CreateTableFromJSON()" value="Create Table From JSON" />
+    <p id="showData"></p>
+</body>
+
+
+<script>
+    function CreateTableFromJSON() {
+        fetch("s1.json")
+            .then(response => response.json())
+            .then(data => {
+
+                // EXTRACT VALUE FOR HTML HEADER.  
+                // ('Name', 'Age', 'College', 'Year', Sem)
+                var col = [];
+                for (var i = 0; i < data.student.length; i++) {
+                    for (var key in data.student[i]) {
+                        if (col.indexOf(key) === -1) {
+                            col.push(key);
+                        }
                     }
                 }
-            }
-        }
-    } while (updated);
-}
-int main()
-{
-    int numNodes, costMatrix[MAX_NODES][MAX_NODES];
-    int distVector[MAX_NODES][MAX_NODES];
-    int nextHop[MAX_NODES][MAX_NODES];
-    printf("Enter the number of nodes: ");
-    scanf("%d", &numNodes);
-    printf("Enter the cost matrix (use %d for INF):\n", INF);
-    for (int i = 0; i < numNodes; i++)
-    {
-        for (int j = 0; j < numNodes; j++)
-        {
-            scanf("%d", &costMatrix[i][j]);
-        }
-    }
-    initialize(numNodes, costMatrix, distVector, nextHop);
-    distanceVectorRouting(numNodes, costMatrix, distVector, nextHop);
-    printRoutingTable(numNodes, distVector, nextHop);
-    return 0;
-}
 
+                console.log(col);
 
-6) Dijkstra's Algorithm
-#include <stdio.h>
-#define INFINITY 9999
-#define MAX 10
-void Dijkstra(int Graph[MAX][MAX], int n, int start)
-{
-    int cost[MAX][MAX], distance[MAX], pred[MAX];
-    int visited[MAX], count, mindistance, nextnode, i, j;
-    for (i = 0; i < n; i++)
-        for (j = 0; j < n; j++)
-            cost[i][j] = (Graph[i][j] == 0) ? INFINITY : Graph[i][j];
-    for (i = 0; i < n; i++)
-    {
-        distance[i] = cost[start][i];
-        pred[i] = start;
-        visited[i] = 0;
-    }
-    distance[start] = 0;
-    visited[start] = 1;
+                // CREATE DYNAMIC TABLE.
+                var table = document.createElement("table");
 
-    count = 1;
-
-    while (count < n - 1)
-    {
-        mindistance = INFINITY;
-        for (i = 0; i < n; i++)
-            if (distance[i] < mindistance && !visited[i])
-            {
-                mindistance = distance[i];
-                nextnode = i;
-            }
-        visited[nextnode] = 1;
-        for (i = 0; i < n; i++)
-            if (!visited[i])
-                if (mindistance + cost[nextnode][i] < distance[i])
-                {
-                    distance[i] = mindistance + cost[nextnode][i];
-                    pred[i] = nextnode;
+                // Create HTML Table Header Row Using The Extracted Headers Above.
+                var tr = table.insertRow(-1); // TABLE ROW.
+                for (var i = 0; i < col.length; i++) {
+                    var th = document.createElement("th"); // TABLE HEADER.
+                    th.innerHTML = col[i];
+                    tr.appendChild(th);
                 }
-        count++;
-    }
 
-    for (i = 0; i < n; i++)
-        if (i != start)
-            printf("\nDistance from source to %d: %d", i, distance[i]);
-}
-
-int main()
-{
-    int Graph[MAX][MAX] = {
-        {0, 0, 1, 2, 0, 0, 0},
-        {0, 0, 2, 0, 0, 3, 0},
-        {1, 2, 0, 1, 3, 0, 0},
-        {2, 0, 1, 0, 0, 0, 1},
-        {0, 0, 3, 0, 0, 2, 0},
-        {0, 3, 0, 0, 2, 0, 1},
-        {0, 0, 0, 1, 0, 1, 0}};
-    int n = 7, u = 0;
-    Dijkstra(Graph, n, u);
-    return 0;
-}
-
-7) Leaky Bucket Algorithm
-#include <stdio.h>
-int main()
-{
-    int bucket_size, output_rate, input_packets, stored = 0, time;
-    printf("Enter bucket size: ");
-    scanf("%d", &bucket_size);
-    printf("Enter output rate (leak rate): ");
-    scanf("%d", &output_rate);
-    printf("Enter number of cycles (time units): ");
-    scanf("%d", &time);
-    while (time--)
-    {
-        printf("\nEnter number of packets arriving: ");
-        scanf("%d", &input_packets);
-        if (stored + input_packets > bucket_size)
-        {
-            printf("Bucket overflow! %d packets dropped.\n", (stored + input_packets) - bucket_size);
-            stored = bucket_size;
-        }
-        else
-        {
-            stored += input_packets;
-        }
-        printf("Packets currently in bucket: %d\n", stored);
-        if (stored >= output_rate)
-        {
-            stored -= output_rate;
-            printf("Packets sent: %d\n", output_rate);
-        }
-        else
-        {
-            printf("Packets sent: %d\n", stored);
-            stored = 0;
-        }
-        printf("Packets left in bucket after sending: %d\n", stored);
-    }
-    return 0;
-}
-
-8) Simple DNS Resolver
-import java.net.*;
-import java.util.Scanner;
-public class dns
-{
-    public static void main(String[] args)
-    {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the Simple DNS Resolver!");
-        System.out.println("Enter a domain name to resolve (or type 'exit' to quit):");
-        while (true)
-        {
-            System.out.print("Domain: ");
-            String domain = scanner.nextLine();
-            if ("exit".equalsIgnoreCase(domain))
-            {
-                System.out.println("Exiting DNS Resolver. Goodbye!");
-                break;
-            }
-            try
-            {
-                InetAddress[] addresses = InetAddress.getAllByName(domain);
-                System.out.println("IP addresses for " + domain + ":");
-                for (InetAddress address : addresses)
-                {
-                    System.out.println(" - " + address.getHostAddress());
+                // ADD JSON DATA TO THE TABLE AS ROWS.
+                for (var i = 0; i < data.student.length; i++) {
+                    tr = table.insertRow(-1);
+                    for (var j = 0; j < col.length; j++) {
+                        var tabCell = tr.insertCell(-1);
+                        tabCell.innerHTML = data.student[i][col[j]];
+                    }
                 }
-            }
-            catch(UnknownHostException e)
-            {
-                System.out.println("Could not resolve domain: " + e.getMessage());
-            }
+
+
+                // Finally Add The Newly Created Table With Json Data To A Container.
+                var divContainer = document.getElementById("showData");
+                divContainer.innerHTML = "";
+                divContainer.appendChild(table);
+            })
+    }
+</script>
+
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student-Marks-Sheet</title>
+
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha3840evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+    <div id="mydata"></div>
+
+    <div id="myformdiv">
+        <h3>Enter Student Details and Marks</h3>
+
+        <form id="myForm" method="post">
+            <label>Student name:</label>
+            <input type="text" id="sname"><br><br>
+
+            <label>Roll number:&nbsp;</label>
+            <input type="text" id="rollno"><br><br>
+
+            <label>subject1 Marks:</label>
+            <input type="text" id="sub1name" placeholder="sub1">
+            <input type="number" id="marks1"><br><br>
+
+            <label>subject2 Marks:</label>
+            <input type="text" id="sub2name" placeholder="sub2">
+            <input type="number" id="marks2"><br><br>
+
+            <label>subject3 Marks:</label>
+            <input type="text" id="sub3name" placeholder="sub3">
+            <input type="number" id="marks3"><br><br>
+
+            <input type="button" onclick="myFunction()" value="Submit">
+        </form>
+    </div>
+
+    <script>
+        function myFunction() {
+            document.getElementById('myformdiv').style.display = 'none';
+
+            let myInfo = `
+                <div class='sdetails'>
+                <h3> Student Details and Marks</h3>
+                <table class="table-bordered table-primary">
+
+                <tr>
+                <td class="bg-primary"> Name</td>
+                <td>${document.getElementById('sname').value}</td>
+                </tr>
+
+                <tr>
+                <td class="bg-primary"> Hallicket Number: </td>
+                <td>${document.getElementById('rollno').value}</td>
+                </tr>
+
+                <tr>
+                <td>${document.getElementById('sub1name').value} Marks</td>
+                <td>${document.getElementById('marks1').value}.</td>
+                </tr>
+
+                <tr>
+                <td>${document.getElementById('sub2name').value} Marks</td>
+                <td>${document.getElementById('marks2').value}</td>
+                </tr>
+
+                <tr>
+                <td>${document.getElementById('sub3name').value} Marks</td>
+                <td>${document.getElementById('marks3').value}</td>
+                </tr>
+
+                </table>
+                </div>
+                `;
+
+            document.getElementById('mydata').innerHTML = myInfo;
         }
-        scanner.close();
+    </script>
+
+</body>
+
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+
+    <title>Weather App</title>
+
+    <style>
+        #weather {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 50%;
+            margin-left: 25%;
+            margin-right: 15%;
+        }
+
+        #weather td,
+        #weather th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #weather tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #weather tr:hover {
+            background-color: #ddd;
+        }
+
+        #weather th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #04AA6D;
+            color: white;
+        }
+    </style>
+
+    <script>
+        function getWeather() {
+            let request = new XMLHttpRequest();
+            let zip = document.getElementById('tb1').value;
+
+            request.open('GET',
+                'https://api.openweathermap.org/data/2.5/weather?q=' +
+                zip + '&appid=93f26e3c57081a6210de53b8dcfdfea4', true);
+
+            request.onload = function () {
+                if (request.status >= 200 && request.status < 400) {
+                    let data = JSON.parse(request.responseText);
+                    console.log(data);
+
+                    var icon = "https://openweathermap.org/img/w/" + data.weather[0].icon + ".png";
+
+                    document.getElementById('temp').innerHTML = data.main.temp + 'F';
+                    document.getElementById('country').innerHTML = data.sys.country;
+                    document.getElementById('city').innerHTML = data.name;
+
+                    let tim = new Date(data.sys.sunrise * 1000);
+                    document.getElementById('sunrise').innerHTML = tim;
+
+                    let tim1 = new Date(data.sys.sunset * 1000);
+                    document.getElementById('sunset').innerHTML = tim1;
+
+                    document.getElementById('windspeed').innerHTML = data.wind.speed;
+                    document.getElementById('humid').innerHTML = data.main.humidity;
+                } else {
+                    console.log('failed connecting');
+                }
+            };
+
+            request.onerror = function () {
+                console.log("Error");
+            };
+
+            request.send();
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="jumbotron text-center">
+            <h1>Please enter Zip code to get weather report.</h1>
+            <input type="text" placeholder="enter zip code" id="tb1"><br><br>
+            <button type="submit" value="Click for weather" onclick="getWeather()">Click me</button>
+        </div>
+
+        <table class="table-bordered table-striped" id="weather">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>Country</td>
+                    <td><label id="country"></label></td>
+                </tr>
+
+                <tr>
+                    <td>City</td>
+                    <td><label id="city"></label></td>
+                </tr>
+
+                <tr>
+                    <td>Temperature</td>
+                    <td><label id="temp"></label></td>
+                </tr>
+
+                <tr>
+                    <td>Humidity</td>
+                    <td><label id="humid"></label></td>
+                </tr>
+
+
+                <tr>
+                    <td>Sunrise</td>
+                    <td><label id="sunrise"></label></td>
+                </tr>
+
+                <tr>
+                    <td>Sunset</td>
+                    <td><label id="sunset"></label></td>
+                </tr>
+
+                <tr>
+                    <td>WindSpeed</td>
+                    <td><label id="windspeed"></label></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
+
+var http = require('http');
+var server = http.createServer(function (req, res) {
+    if (req.url == '/') {  
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write('<html><body><p>This is home Page.</p></body></html>');
+        res.end();
+    }
+    else if (req.url == "/student") {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write('<html><body><p>This is student Page.</p></body></html>');
+        res.end();
+    }
+    else if (req.url == "/admin") {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write('<html><body><p>This is admin Page.</p></body></html>');
+        res.end();
+    }
+    else
+        res.end('Invalid Request!');
+});
+server.listen(8000);
+console.log('Node.js web server at port 8000 is running..') 
+
+var fs = require('fs'); 
+try { 
+var data = fs.readFileSync('my-file.txt', 'utf8'); 
+console.log(data);     
+} catch(e) { 
+console.log('Error:', e.stack); 
+} 
+
+var fs = require('fs');
+
+fs.appendFile('newfile.txt', `Learn Node FS module \n`, function (err) {
+    if (err) throw err;
+    console.log('File is Appended successfully.');
+}); 
+
+1. show dbs
+2. use student
+3. db.studentinfo.insert({name:"john",id:"20bd1a05051",course:"b.tech",branch:"cse"})
+4. db.studentinfo.insert({name:"reena",id:"20bd1a0502",course:"M.tech",branch:"it"})
+5. db.studentinfo.insert({name:"ram",id:"20bd1a0503",course:"b.tech",branch:"cse"})
+6. db.studentinfo.find({})
+
+
+ProjectFolder\controller\index.js
+module.exports = (req, res) => {
+    res.render('index');
+}
+
+ProjectFolder\controller\newCustomer.js
+module.exports = (req, res) => {
+    res.render('register', { status: "" });
+}
+
+ProjectFolder\controller\searchdb.js
+module.exports = (req, res) => {
+    res.render('register', { status: "" });
+}
+
+ProjectFolder\controller\updateCustomer.js
+module.exports = (req, res) => {
+    res.render('update', { status: "" });
+}
+
+ProjectFolder\controller\updateCustomer.js
+const Student = require('../model/student.js');
+
+module.exports = async (req, res) => {
+    var updateData = {};
+    if(req.body.name) updateData.name = req.body.name;
+    if(req.body.id) updateData.id = req.body.id;
+    if(req.body.course) updateData.course = req.body.course;
+    if(req.body.branch) updateData.branch = req.body.branch;
+
+    try {
+        // Use 'await' for the update
+        await Student.updateOne({ name: req.body.cname }, { $set: updateData });
+        res.render('update', { status: 'Student Details Updated Successfully' });
+    } catch (error) {
+        console.log(error);
+        res.render('update', { status: 'Cannot Update Details' });
     }
 }
 
-9) Ping Service
-import java.net.*;
-import java.io.*;
-public class ping
-{
-    public static void main(String[] args)
-    {
-        if (args.length != 1)
-        {
-            System.out.println("Usage: java PingService <hostname>");
-            return;
-        }
-        String hostname = args[0]; 
-        try
-        {
-            System.out.println("Pinging " + hostname + "...");
-            InetAddress inetAddress = InetAddress.getByName(hostname);
-            boolean isReachable = inetAddress.isReachable(5000);
-            if (isReachable)
-            {
-                System.out.println("Host " + hostname + " is reachable.");
-                System.out.println("IP Address: " + inetAddress.getHostAddress());
-            }
-            else
-            {
-                System.out.println("Host " + hostname + " is not reachable.");
-            }
-        }
-        catch(UnknownHostException e)
-        {
-            System.out.println("Unknown host: " + hostname);
-        }
-        catch(IOException e)
-        {
-            System.out.println("Error occurred while pinging " + hostname + ": " +e.getMessage());
-        }
-    }
-}
+ProjectFolder\model\student.js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-10) Write a program to perform bitwise AND and XOR operation with 127 on each character of a given string and display the results.
-#include <stdio.h>
-int main()
-{
-    char str[100];
-    int i;
-    printf("Enter a string: ");
-    fgets(str, sizeof(str), stdin); // reads a line of text including spaces
-    printf("\nOriginal String: %s\n", str);
-    printf("Character\tASCII\tAND(127)\tXOR(127)\n");
-    printf("---------------------------------------------\n");
-    for (i = 0; str[i] != '\0'; i++)
-    {
-        if (str[i] == '\n') 
-            continue;
-        char and_result = str[i] & 127; 
-        char xor_result = str[i] ^ 127; 
-        printf(" %c\t\t%d\t   %d\t\t   %d\n", str[i], str[i], and_result, xor_result);
-    }
-    return 0;
-}
+const StudentSchema = new Schema({
+    name: { type: String, required: true, unique: true },
+    id: { type: String, required: true },
+    course: { type: String, required: true },
+    branch: { type: String, required: true }
+});
 
+const Student = mongoose.model('studentinfo', StudentSchema);
+module.exports = Student;
 
-11) Write a program to perform XOR on a given string with 0 and display the result.
-#include <stdio.h>
-int main()
-{
-    char str[100]; 
-    int i = 0;
-    printf("Enter a string: ");
-    fgets(str, sizeof(str), stdin); 
-    while (str[i] != '\0')
-    {
-        printf("%c", str[i] ^ 2); 
-        i++;
-    }
-    return 0;
-}
+ProjectFolder\view\index.ejs
+<html>
+<body>
+    <nav>
+        <a href="/">Home</a> |
+        <a href="/page/register">Add Student</a> |
+        <a href="/page/search">Search Student</a> |
+        <a href="/page/update">Update Student</a>
+    </nav>
+    <h3>Welcome to Student CRUD Application</h3>
+</body>
+</html>
+
+ProjectFolder\view\register.ejs
+
+<html>
+<body>
+    <a href="/">Home</a> | <a href="/page/search">Search</a> | <a href="/page/update">Update</a>
+    
+    <h3>Register New Student</h3>
+    <form action="/customer/register" method="POST">
+        <input type="text" placeholder="Name" name="name"> <br>
+        <input type="text" placeholder="Roll No" name="id"> <br>
+        <input type="text" placeholder="Course" name="course"> <br>
+        <input type="text" placeholder="Branch" name="branch"> <br>
+        <button type="submit">Add</button>
+    </form>
+    <h1><%= status %></h1>
+</body>
+</html>
+
+ProjectFolder\view\search.ejs
+
+<html>
+<body>
+    <a href="/">Home</a> | <a href="/page/register">Add</a> | <a href="/page/update">Update</a>
+
+    <h3>Search Student</h3>
+    <form action="/student/fetch" method="POST">
+        <input type="text" placeholder="Search by Roll No" name="rollno">
+        <button type="submit">Fetch</button>
+    </form>
+
+    <% if(view) { %>
+        <table border="1">
+            <tr>
+                <th>Name</th>
+                <th>Roll No</th>
+                <th>Course</th>
+                <th>Branch</th>
+            </tr>
+            <% if(stuData.length != 0) { %>
+                <% stuData.forEach(function(data) { %>
+                    <tr>
+                        <td><%= data.name %></td>
+                        <td><%= data.id %></td>
+                        <td><%= data.course %></td>
+                        <td><%= data.branch %></td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr><td colspan="4">No Data Found</td></tr>
+            <% } %>
+        </table>
+    <% } %>
+</body>
+</html>
+
+ProjectFolder\view\update.ejs
+
+<html>
+<body>
+    <a href="/">Home</a> | <a href="/page/register">Add</a> | <a href="/page/search">Search</a>
+
+    <h3>Update Student Details</h3>
+    <form action="/customer/update" method="POST">
+        <input type="text" placeholder="Name of student to update" name="cname"> <br><br>
+        
+        <input type="text" placeholder="New Name" name="name"> <br>
+        <input type="text" placeholder="New Roll No" name="id"> <br>
+        <input type="text" placeholder="New Course" name="course"> <br>
+        <input type="text" placeholder="New Branch" name="branch"> <br>
+        <button type="submit">Update</button>
+    </form>
+    <h1><%= status %></h1>
+</body>
+</html>
+
+app.js
+const express = require('express');
+const app = express();
+const path = require('path');
+const mongoose = require('mongoose');
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Setup View Engine
+app.set('views', path.join(__dirname, 'view'));
+app.set('view engine', 'ejs');
+
+// Database Connection
+mongoose.connect('mongodb://localhost/student')
+.then(() => {
+    console.log("Connected to MongoDB");
+})
+
+// Import Controllers
+const indexController = require('./controller/index');
+const newCustomerController = require('./controller/newCustomer');
+const storeCustomerController = require('./controller/storeCustomer');
+const searchStudentController = require('./controller/searchStudent');
+const searchDbController = require('./controller/searchdb');
+const updateCustomerController = require('./controller/updateCustomer');
+const updateDocController = require('./controller/updatedoc');
+
+// Routes
+app.get('/', indexController); 
+app.get('/page/register', newCustomerController); 
+app.post('/customer/register', storeCustomerController); 
+app.get('/page/search', searchStudentController); 
+app.post('/student/fetch', searchDbController); 
+app.get('/page/update', updateCustomerController); 
+app.post('/customer/update', updateDocController); 
+
+app.listen(3000, () => {
+    console.log("App listening on port 3000!");
+});
